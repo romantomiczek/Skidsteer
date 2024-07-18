@@ -62,7 +62,6 @@ int bucketPosition = 180;
 Servo armServo;
 Servo bucketServo;
 
-
 void motorForward()
 {
   analogWrite(MOTOR1_PIN1, abs(PWM_VALUE_MOVE));
@@ -174,35 +173,33 @@ void bucketControl()
 void setup()
 {
   Serial.begin(115200);
-  armServo.attach(SERVO_PIN_1);
-  bucketServo.attach(SERVO_PIN_2);
+
+  armServo.attach(SERVO_ARM_PIN);
+  bucketServo.attach(SERVO_BUCKET_PIN);
+
   RemoteXY_Init();
-  // motorStop();
+
+  motorStop();
 }
 
 void loop()
 {
   RemoteXY_Handler();
 
-  if (millis() - previousMillis >= 5)
-  {
-    previousMillis = millis();
+  carMove = RemoteXY.motor_y / 100;
+  carTurn = RemoteXY.motor_x / 100;
+  armMove = -RemoteXY.arm;
+  bucketMove = -RemoteXY.bucket;
 
-    carMove = RemoteXY.motor_y / 100;
-    carTurn = RemoteXY.motor_x / 100;
-    armMove = -RemoteXY.arm;
-    bucketMove = -RemoteXY.bucket;
+  /* debug(carMove);
+  debug("\t");
+  debugln(carTurn); */
 
-    /* debug(carMove);
-    debug("\t");
-    debugln(carTurn); */
+  /* debug(armPosition);
+  debug("\t");
+  debugln(bucketPosition); */
 
-    /* debug(armPosition);
-    debug("\t");
-    debugln(bucketPosition); */
-
-    carControl();
-    armControl();
-    bucketControl();
-  }
+  carControl();
+  armControl();
+  bucketControl();
 }
