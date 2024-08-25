@@ -11,7 +11,7 @@
 #include <ESP8266WiFi.h>
 
 // RemoteXY connection settings
-#define REMOTEXY_WIFI_SSID "RemoteXY"
+#define REMOTEXY_WIFI_SSID "Skidsteer"
 #define REMOTEXY_WIFI_PASSWORD "12345678"
 #define REMOTEXY_SERVER_PORT 6377
 #define REMOTEXY_ACCESS_PASSWORD "12345678"
@@ -58,44 +58,46 @@ int armMove = 0;
 int bucketMove = 0;
 int armPosition = 150;
 int bucketPosition = 180;
+int moveSpeed = 0;
+int turnSpeed = 0;
 
 Servo armServo;
 Servo bucketServo;
 
 void motorForward()
 {
-  analogWrite(MOTOR1_PIN1, abs(PWM_VALUE_MOVE));
+  analogWrite(MOTOR1_PIN1, abs(moveSpeed));
   digitalWrite(MOTOR1_PIN2, LOW);
 
-  analogWrite(MOTOR2_PIN1, abs(PWM_VALUE_MOVE));
+  analogWrite(MOTOR2_PIN1, abs(moveSpeed));
   digitalWrite(MOTOR2_PIN2, LOW);
 }
 
 void motorBackward()
 {
   digitalWrite(MOTOR1_PIN1, LOW);
-  analogWrite(MOTOR1_PIN2, abs(PWM_VALUE_MOVE));
+  analogWrite(MOTOR1_PIN2, abs(moveSpeed));
 
   digitalWrite(MOTOR2_PIN1, LOW);
-  analogWrite(MOTOR2_PIN2, abs(PWM_VALUE_MOVE));
+  analogWrite(MOTOR2_PIN2, abs(moveSpeed));
 }
 
 void motorLeft()
 {
   digitalWrite(MOTOR1_PIN1, LOW);
-  analogWrite(MOTOR1_PIN2, abs(PWM_VALUE_TURN));
+  analogWrite(MOTOR1_PIN2, abs(turnSpeed));
 
-  analogWrite(MOTOR2_PIN1, abs(PWM_VALUE_TURN));
+  analogWrite(MOTOR2_PIN1, abs(turnSpeed));
   digitalWrite(MOTOR2_PIN2, LOW);
 }
 
 void motorRight()
 {
-  analogWrite(MOTOR1_PIN1, abs(PWM_VALUE_TURN));
+  analogWrite(MOTOR1_PIN1, abs(turnSpeed));
   digitalWrite(MOTOR1_PIN2, LOW);
 
   digitalWrite(MOTOR2_PIN1, LOW);
-  analogWrite(MOTOR2_PIN2, abs(PWM_VALUE_TURN));
+  analogWrite(MOTOR2_PIN2, abs(turnSpeed));
 }
 
 void motorStop()
@@ -108,30 +110,30 @@ void motorStop()
 
 void carControl()
 {
-  if (carMove != 0 && carTurn == 0)
+  if (abs(carMove) > 50 && abs(carTurn) < 50)
   {
     if (carMove > 0)
     {
       motorForward();
-      debugln("Forward");
+      // debugln("Forward");
     }
     else
     {
       motorBackward();
-      debugln("Backward");
+      // debugln("Backward");
     }
   }
-  else if (carMove == 0 && carTurn != 0)
+  else if (abs(carMove) < 50 && abs(carTurn) > 50)
   {
     if (carTurn > 0)
     {
       motorRight();
-      debugln("Right");
+      // debugln("Right");
     }
     else
     {
       motorLeft();
-      debugln("Left");
+      // debugln("Left");
     }
   }
   else
@@ -174,8 +176,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  armServo.attach(SERVO_ARM_PIN);
-  bucketServo.attach(SERVO_BUCKET_PIN);
+  armServo.attach(SERVO_ARM_PIN, 500, 2500);
+  bucketServo.attach(SERVO_BUCKET_PIN, 500, 2500);
 
   RemoteXY_Init();
 
@@ -186,10 +188,13 @@ void loop()
 {
   RemoteXY_Handler();
 
-  carMove = RemoteXY.motor_y / 100;
-  carTurn = RemoteXY.motor_x / 100;
+  carMove = RemoteXY.motor_y;
+  carTurn = RemoteXY.motor_x;
   armMove = -RemoteXY.arm;
   bucketMove = -RemoteXY.bucket;
+
+  moveSpeed = map(abs(carMove), 0, 100, 20, 150);
+  turnSpeed = map(abs(carTurn), 0, 100, 40, 100);
 
   /* debug(carMove);
   debug("\t");
