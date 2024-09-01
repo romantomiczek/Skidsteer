@@ -11,7 +11,7 @@
 #include <ESP8266WiFi.h>
 
 // RemoteXY connection settings
-#define REMOTEXY_WIFI_SSID "Skidsteer"
+#define REMOTEXY_WIFI_SSID "Bobek"
 #define REMOTEXY_WIFI_PASSWORD "12345678"
 #define REMOTEXY_SERVER_PORT 6377
 #define REMOTEXY_ACCESS_PASSWORD "12345678"
@@ -56,7 +56,7 @@ int carMove = 0;
 int carTurn = 0;
 int armMove = 0;
 int bucketMove = 0;
-int armPosition = 150;
+int armPosition = 180;
 int bucketPosition = 180;
 int moveSpeed = 0;
 int turnSpeed = 0;
@@ -144,12 +144,12 @@ void carControl()
 
 void armControl()
 {
-  if (armMove > 90)
+  if (armMove > 50)
   {
     armPosition = armPosition + SERVO_STEP;
     armPosition > 180 ? armPosition = 180 : armPosition;
   }
-  else if (armMove < -90)
+  else if (armMove < -50)
   {
     armPosition = armPosition - SERVO_STEP;
     armPosition < 0 ? armPosition = 0 : armPosition;
@@ -159,12 +159,12 @@ void armControl()
 
 void bucketControl()
 {
-  if (bucketMove > 90)
+  if (bucketMove > 50)
   {
     bucketPosition = bucketPosition + SERVO_STEP;
     bucketPosition > 180 ? bucketPosition = 180 : bucketPosition;
   }
-  else if (bucketMove < -90)
+  else if (bucketMove < -50)
   {
     bucketPosition = bucketPosition - SERVO_STEP;
     bucketPosition < 0 ? bucketPosition = 0 : bucketPosition;
@@ -194,7 +194,7 @@ void loop()
   bucketMove = -RemoteXY.bucket;
 
   moveSpeed = map(abs(carMove), 0, 100, 20, 150);
-  turnSpeed = map(abs(carTurn), 0, 100, 40, 100);
+  turnSpeed = map(abs(carTurn), 0, 100, 60, 110);
 
   /* debug(carMove);
   debug("\t");
